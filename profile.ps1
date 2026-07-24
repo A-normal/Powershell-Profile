@@ -1,44 +1,50 @@
 # Copyright (c) 2026 修仙者一号
 # SPDX-License-Identifier: GPL-3.0-only
-# 文件用途：PowerShell Profile 主入口，按环境开关加载本机配置和功能脚本。
+# 文件用途：PowerShell Profile 主入口，按配置开关加载本机配置和功能脚本。
+
+$global:PSProfileRoot = $PSScriptRoot
 
 $envFile = Join-Path $PSScriptRoot 'env.ps1'
 if (Test-Path -LiteralPath $envFile) {
     . $envFile
 }
 else {
-    Write-Warning "Missing local configuration: $envFile"
+    Write-Warning "缺少可同步配置文件：$envFile"
+    return
 }
 
-# 路径只属于本机，不与仓库同步；location.ps1 由 .gitignore 排除。
-# 必须在加载功能脚本前读取，dev 和启动目录都会使用其中的路径变量。
+# 路径只属于本机，不与仓库同步；必须在加载 dev 前读取。
 $locationFile = Join-Path $PSScriptRoot 'location.ps1'
 if (Test-Path -LiteralPath $locationFile) {
     . $locationFile
 }
-elseif ($env:PS_PROFILE_ENABLE_DEV -ne 'false') {
-    Write-Warning "Missing local path configuration: $locationFile"
-}
 
 $functionsPath = Join-Path $PSScriptRoot 'functions'
-
-if ($env:PS_PROFILE_ENABLE_DEV -ne 'false') {
-    . (Join-Path $functionsPath 'dev.ps1')
+$coreFile = Join-Path $PSScriptRoot 'core\core.ps1'
+if (Test-Path -LiteralPath $coreFile -PathType Leaf) {
+    . $coreFile
 }
-if ($env:PS_PROFILE_ENABLE_GIT -ne 'false') {
-    . (Join-Path $functionsPath 'git.ps1')
-}
-if ($env:PS_PROFILE_ENABLE_RUN -ne 'false') {
-    . (Join-Path $functionsPath 'run.ps1')
-}
-if ($env:PS_PROFILE_ENABLE_UTILS -ne 'false') {
-    . (Join-Path $functionsPath 'utils.ps1')
+else {
+    Write-Warning "缺少 Profile 核心命令脚本：$coreFile"
 }
 
-if ($env:PS_PROFILE_STARTUP_PATH -and (Test-Path -LiteralPath $env:PS_PROFILE_STARTUP_PATH -PathType Container)) {
-    Set-Location -LiteralPath $env:PS_PROFILE_STARTUP_PATH
+$featureFiles = [ordered]@{
+    Dev        = 'dev.ps1'
+    Git        = 'git.ps1'
+    Run        = 'run.ps1'
+    PSReadLine = 'psreadline.ps1'
 }
 
-Write-Host ""
-Write-Host "🚀 PowerShell Ready" -ForegroundColor Green
-Write-Host ""
+foreach ($featureName in $featureFiles.Keys) {
+    if (-not $global:PSProfileConfig.Features[$featureName]) {
+        continue
+    }
+
+    $featureFile = Join-Path $functionsPath $featureFiles[$featureName]
+    if (Test-Path -LiteralPath $featureFile -PathType Leaf) {
+        . $featureFile
+    }
+    else {
+        Write-Warning "已启用功能 $featureName，但缺少脚本：$featureFile"
+    }
+}
