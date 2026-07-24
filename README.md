@@ -24,7 +24,6 @@ PowerShell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 Local paths and switches live in `env.ps1`; it is never committed. Available settings are:
 
 ```powershell
-$env:PS_PROFILE_UNIVERSITY_PATH = '...'
 $env:PS_PROFILE_SERVER_PATH = '...'
 $env:PS_PROFILE_REPOSITORIES_PATH = '...'
 $env:PS_PROFILE_ENABLE_DEV = 'true'

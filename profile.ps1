@@ -21,3 +21,7 @@ if ($env:PS_PROFILE_ENABLE_RUN -ne 'false') {
 if ($env:PS_PROFILE_STARTUP_PATH -and (Test-Path -LiteralPath $env:PS_PROFILE_STARTUP_PATH -PathType Container)) {
     Set-Location -LiteralPath $env:PS_PROFILE_STARTUP_PATH
 }
+
+Write-Host ""
+Write-Host "🚀 PowerShell Ready" -ForegroundColor Green
+Write-Host ""

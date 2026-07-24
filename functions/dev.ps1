@@ -1,12 +1,12 @@
 function dev {
     param(
         [Parameter(Mandatory)]
-        [ValidateSet('uni', 'serve', 'repo')]
+        [ValidateSet('start', 'serve', 'repo')]
         [string]$Target
     )
 
     $path = switch ($Target) {
-        'uni' { $env:PS_PROFILE_UNIVERSITY_PATH }
+        'start' { $env:PS_PROFILE_STARTUP_PATH }
         'serve' { $env:PS_PROFILE_SERVER_PATH }
         'repo' { $env:PS_PROFILE_REPOSITORIES_PATH }
     }
