@@ -1,3 +1,7 @@
+# Copyright (c) 2026 修仙者一号
+# SPDX-License-Identifier: GPL-3.0-only
+# 文件用途：安装或更新默认 $PROFILE 加载器，并记录本仓库的位置。
+
 [CmdletBinding(SupportsShouldProcess)]
 # 用法：在仓库根目录执行 .\install.ps1。
 # 若仓库搬家，重新执行一次即可更新环境变量中的仓库路径。

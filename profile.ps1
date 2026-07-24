@@ -1,3 +1,7 @@
+# Copyright (c) 2026 修仙者一号
+# SPDX-License-Identifier: GPL-3.0-only
+# 文件用途：PowerShell Profile 主入口，按环境开关加载本机配置和功能脚本。
+
 $envFile = Join-Path $PSScriptRoot 'env.ps1'
 if (Test-Path -LiteralPath $envFile) {
     . $envFile

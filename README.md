@@ -1,5 +1,9 @@
 # Powershell-Profile
 
+版权所有 © 2026 修仙者一号。许可证：GNU GPL v3.0（GPL-3.0-only）。
+
+本文档说明本仓库的 PowerShell Profile 加载、配置与安装方式。
+
 ```text
 profile.ps1
 functions/

@@ -1,3 +1,7 @@
+# Copyright (c) 2026 修仙者一号
+# SPDX-License-Identifier: GPL-3.0-only
+# 文件用途：在本机预设的项目目录之间快速切换。
+
 function dev {
     param(
         [Parameter(Mandatory)]

@@ -1,3 +1,7 @@
+# Copyright (c) 2026 修仙者一号
+# SPDX-License-Identifier: GPL-3.0-only
+# 文件用途：常用 Git 操作的快捷命令。
+
 function g {
     param(
         [Parameter(Mandatory)]
