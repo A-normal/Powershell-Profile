@@ -1,0 +1,4 @@
+$env:PS_PROFILE_ENABLE_GIT = 'true'
+$env:PS_PROFILE_ENABLE_UTILS = 'true'
+$env:PS_PROFILE_ENABLE_RUN = 'false'
+$env:PS_PROFILE_ENABLE_DEV = 'false'
