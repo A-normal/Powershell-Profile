@@ -18,15 +18,25 @@ function global:pp {
             Write-Host '  pp doctor     检查配置、路径和外部依赖'
             Write-Host '  pp reload     在当前窗口重新加载配置'
             Write-Host '  pp root       进入 Profile 仓库目录'
-            Write-Host ''
-            Write-Host '常用工作命令：' -ForegroundColor Cyan
-            Write-Host '  dev <名称>    进入 location.ps1 中配置的目录'
-            Write-Host '  g f           获取并清理远端分支信息'
-            Write-Host '  g sync        仅以 fast-forward 方式同步当前分支'
-            Write-Host '  g vv          查看本地分支及其上游'
-            Write-Host '  g sw <分支>   切换分支'
-            Write-Host '  run wsl       以 root 进入 WSL'
-            Write-Host '  run wsl user  以默认普通用户进入 WSL'
+            if ($global:PSProfileConfig.Features.Dev -or
+                $global:PSProfileConfig.Features.Git -or
+                $global:PSProfileConfig.Features.Run) {
+                Write-Host ''
+                Write-Host '已启用的工作命令：' -ForegroundColor Cyan
+            }
+            if ($global:PSProfileConfig.Features.Dev) {
+                Write-Host '  dev <名称>    进入 location.ps1 中配置的目录'
+            }
+            if ($global:PSProfileConfig.Features.Git) {
+                Write-Host '  g f           获取并清理远端分支信息'
+                Write-Host '  g sync        仅以 fast-forward 方式同步当前分支'
+                Write-Host '  g vv          查看本地分支及其上游'
+                Write-Host '  g sw <分支>   切换分支'
+            }
+            if ($global:PSProfileConfig.Features.Run) {
+                Write-Host '  run wsl       以 root 进入 WSL'
+                Write-Host '  run wsl user  以默认普通用户进入 WSL'
+            }
             return
         }
         'reload' {
@@ -95,21 +105,23 @@ function global:pp {
                     Message = if ($loaderCurrent) { $profilePath } else { "未安装或版本过旧；请运行 $global:PSProfileRoot\install.ps1" }
                 })
 
-            if ($global:PSProfileConfig.Paths.Count -eq 0) {
-                $checks.Add([pscustomobject]@{
-                        Status  = 'WARN'
-                        Item    = '本机路径'
-                        Message = '未配置；请复制 location.example.ps1 为 location.ps1'
-                    })
-            }
-            else {
-                foreach ($pathName in $global:PSProfileConfig.Paths.Keys) {
-                    $configuredPath = $global:PSProfileConfig.Paths[$pathName]
+            if ($global:PSProfileConfig.Features.Dev) {
+                if ($global:PSProfileConfig.Paths.Count -eq 0) {
                     $checks.Add([pscustomobject]@{
-                            Status  = if (Test-Path -LiteralPath $configuredPath -PathType Container) { 'OK' } else { 'FAIL' }
-                            Item    = "路径 $pathName"
-                            Message = $configuredPath
+                            Status  = 'WARN'
+                            Item    = '本机路径'
+                            Message = '未配置；请复制 location.example.ps1 为 location.ps1'
                         })
+                }
+                else {
+                    foreach ($pathName in $global:PSProfileConfig.Paths.Keys) {
+                        $configuredPath = $global:PSProfileConfig.Paths[$pathName]
+                        $checks.Add([pscustomobject]@{
+                                Status  = if (Test-Path -LiteralPath $configuredPath -PathType Container) { 'OK' } else { 'FAIL' }
+                                Item    = "路径 $pathName"
+                                Message = $configuredPath
+                            })
+                    }
                 }
             }
 

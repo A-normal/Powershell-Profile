@@ -80,6 +80,8 @@ $global:PSProfileConfig = [ordered]@{
 
 PSReadLine 仅在交互式终端中配置，默认使用历史预测和列表视图；上下方向键按照已输入的前缀搜索历史命令。
 
+关闭 `Dev`、`Git` 或 `Run` 后执行 `pp reload`，对应命令会从当前 Shell 中卸载。`Dev` 关闭时不会读取 `location.ps1`，帮助和自检也不会展示或检查本机路径。
+
 ## 命令说明
 
 直接执行 `pp` 或 `pp help` 可以随时查看简要用法。

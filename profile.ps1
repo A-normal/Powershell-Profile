@@ -13,9 +13,15 @@ else {
     return
 }
 
-# 路径只属于本机，不与仓库同步；必须在加载 dev 前读取。
+# 重载时先清理本 Profile 管理的可选命令，避免关闭功能后残留旧定义。
+$managedCommands = @('dev', 'g', 'run')
+foreach ($managedCommand in $managedCommands) {
+    Remove-Item -LiteralPath "Function:\$managedCommand" -Force -ErrorAction SilentlyContinue
+}
+
+# 路径只属于 Dev 功能；关闭 Dev 时不读取任何本机路径配置。
 $locationFile = Join-Path $PSScriptRoot 'location.ps1'
-if (Test-Path -LiteralPath $locationFile) {
+if ($global:PSProfileConfig.Features.Dev -and (Test-Path -LiteralPath $locationFile)) {
     . $locationFile
 }
 
