@@ -2,9 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # 文件用途：本机路径配置模板；复制为 location.ps1 后填写真实路径。
 
-# 键名会成为 dev 命令的参数，并自动参与 Tab 补全。
+# 键名会成为 j 命令的参数，也可被本机任务通过 PathKey 引用。
 $global:PSProfileConfig.Paths = [ordered]@{
-    work   = 'C:\Path\To\Work'
-    server = 'C:\Path\To\Server'
-    repo   = 'C:\Path\To\Repositories'
+    project = 'C:\Path\To\Project'
+    repo    = 'C:\Path\To\Repositories'
 }
