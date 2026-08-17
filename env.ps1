@@ -4,9 +4,10 @@
 
 $global:PSProfileConfig = [ordered]@{
     Features   = [ordered]@{
-        Dev        = $false
+        Jump       = $true
+        Dev        = $true
         Git        = $true
-        Run        = $false
+        Run        = $true
         PSReadLine = $true
     }
     PSReadLine = [ordered]@{
@@ -14,5 +15,7 @@ $global:PSProfileConfig = [ordered]@{
         PredictionViewStyle           = 'ListView'
         HistorySearchCursorMovesToEnd = $true
     }
-    Paths      = [ordered]@{}
+    Paths       = [ordered]@{}
+    Development = [ordered]@{}
+    RunTargets  = [ordered]@{}
 }
