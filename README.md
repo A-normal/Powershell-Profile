@@ -61,7 +61,7 @@ $global:PSProfileConfig.Paths = [ordered]@{
 
 路径键会成为 `j` 的参数，也可被任务通过 `PathKey` 引用。新增路径只需修改本机文件。
 
-`tasks.ps1` 保存开发任务和运行目标。任务必须把可执行程序与参数数组分开声明：
+`tasks.ps1` 保存开发任务和运行目标。任务必须把可执行程序与参数数组分开声明；需要串行处理时可以配置 `Steps`：
 
 ```powershell
 $global:PSProfileConfig.Development = [ordered]@{
@@ -69,15 +69,23 @@ $global:PSProfileConfig.Development = [ordered]@{
         PathKey = 'project'
         Actions = [ordered]@{
             action = [ordered]@{
-                Executable = 'tool'
-                Arguments  = @('argument')
+                Steps = @(
+                    [ordered]@{
+                        Executable = 'tool'
+                        Arguments  = @('first')
+                    }
+                    [ordered]@{
+                        Executable = 'tool'
+                        Arguments  = @('second')
+                    }
+                )
             }
         }
     }
 }
 ```
 
-`dev` 和 `run` 只执行配置表中精确匹配的项目、目标和动作，不接受额外参数。任务执行器不使用 `Invoke-Expression`，不会解释或拼接命令字符串。配置了工作目录时，执行结束后会恢复原目录；子目录也不能越过对应的项目根目录。
+`dev` 和 `run` 只执行配置表中精确匹配的项目、目标和动作，不接受额外参数。任务执行器不使用 `Invoke-Expression`，不会解释或拼接命令字符串。多个步骤按照配置顺序执行，任一步骤失败都会停止后续步骤。配置了工作目录时，执行结束后会恢复原目录；子目录也不能越过对应的项目根目录。
 
 ## 可同步配置
 

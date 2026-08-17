@@ -12,8 +12,7 @@ function global:Resolve-PSProfileTask {
         IsValid         = $false
         Message         = $null
         WorkingDirectory = $null
-        Executable      = $null
-        Arguments       = @()
+        Steps           = @()
     }
 
     if (-not $Task) {
@@ -21,9 +20,10 @@ function global:Resolve-PSProfileTask {
         return [pscustomobject]$result
     }
 
-    $executable = if ($Task.Contains('Executable')) { [string]$Task['Executable'] } else { $null }
-    if ([string]::IsNullOrWhiteSpace($executable)) {
-        $result.Message = '任务缺少 Executable。'
+    $hasSingleStep = $Task.Contains('Executable')
+    $hasMultipleSteps = $Task.Contains('Steps')
+    if ($hasSingleStep -eq $hasMultipleSteps) {
+        $result.Message = '任务必须且只能配置 Executable 或 Steps 其中一种格式。'
         return [pscustomobject]$result
     }
 
@@ -85,23 +85,48 @@ function global:Resolve-PSProfileTask {
         return [pscustomobject]$result
     }
 
-    $command = Get-Command $executable -ErrorAction SilentlyContinue
-    if (-not $command) {
-        $result.Message = "找不到任务所需命令：$executable"
+    $stepDefinitions = if ($hasMultipleSteps) { @($Task['Steps']) } else { @($Task) }
+    if ($stepDefinitions.Count -eq 0) {
+        $result.Message = '任务的 Steps 不能为空。'
         return [pscustomobject]$result
     }
 
-    $arguments = if ($Task.Contains('Arguments')) { @($Task['Arguments']) } else { @() }
+    $resolvedSteps = [System.Collections.Generic.List[object]]::new()
+    for ($stepIndex = 0; $stepIndex -lt $stepDefinitions.Count; $stepIndex++) {
+        $step = $stepDefinitions[$stepIndex]
+        if (-not ($step -is [System.Collections.IDictionary])) {
+            $result.Message = "任务步骤 $($stepIndex + 1) 格式不正确。"
+            return [pscustomobject]$result
+        }
+
+        $executable = if ($step.Contains('Executable')) { [string]$step['Executable'] } else { $null }
+        if ([string]::IsNullOrWhiteSpace($executable)) {
+            $result.Message = "任务步骤 $($stepIndex + 1) 缺少 Executable。"
+            return [pscustomobject]$result
+        }
+
+        $command = Get-Command $executable -ErrorAction SilentlyContinue
+        if (-not $command) {
+            $result.Message = "找不到任务步骤 $($stepIndex + 1) 所需命令：$executable"
+            return [pscustomobject]$result
+        }
+
+        $resolvedSteps.Add([pscustomobject]@{
+                Executable = $executable
+                Arguments  = if ($step.Contains('Arguments')) { @($step['Arguments']) } else { @() }
+            })
+    }
+
+    $stepSummary = @($resolvedSteps | ForEach-Object Executable) -join ' -> '
     $result.IsValid = $true
     $result.Message = if ($workingDirectory) {
-        "$workingDirectory -> $executable"
+        "$workingDirectory -> $stepSummary"
     }
     else {
-        $executable
+        $stepSummary
     }
     $result.WorkingDirectory = $workingDirectory
-    $result.Executable = $executable
-    $result.Arguments = $arguments
+    $result.Steps = @($resolvedSteps)
     return [pscustomobject]$result
 }
 
@@ -124,8 +149,22 @@ function global:Invoke-PSProfileTask {
             $locationChanged = $true
         }
 
-        $taskArguments = @($resolvedTask.Arguments)
-        & $resolvedTask.Executable @taskArguments
+        for ($stepIndex = 0; $stepIndex -lt $resolvedTask.Steps.Count; $stepIndex++) {
+            $step = $resolvedTask.Steps[$stepIndex]
+            $taskArguments = @($step.Arguments)
+            $lastErrorBefore = $global:Error[0]
+            $global:LASTEXITCODE = 0
+            & $step.Executable @taskArguments
+            $invocationSucceeded = $?
+            $hasNewError = -not [object]::ReferenceEquals($lastErrorBefore, $global:Error[0])
+            $stepSucceeded = $invocationSucceeded -and -not $hasNewError -and $LASTEXITCODE -eq 0
+
+            if (-not $stepSucceeded) {
+                $exitMessage = if ($null -ne $LASTEXITCODE) { "，退出码：$LASTEXITCODE" } else { $null }
+                Write-Warning "任务步骤 $($stepIndex + 1) 执行失败$exitMessage；已停止后续步骤。"
+                return
+            }
+        }
     }
     catch {
         Write-Warning "任务执行失败：$($_.Exception.Message)"
