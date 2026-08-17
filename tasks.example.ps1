@@ -7,8 +7,16 @@ $global:PSProfileConfig.Development = [ordered]@{
         PathKey = 'project'
         Actions = [ordered]@{
             action = [ordered]@{
-                Executable = 'tool'
-                Arguments  = @('argument')
+                Steps = @(
+                    [ordered]@{
+                        Executable = 'tool'
+                        Arguments  = @('first')
+                    }
+                    [ordered]@{
+                        Executable = 'tool'
+                        Arguments  = @('second')
+                    }
+                )
             }
         }
     }
