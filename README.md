@@ -127,8 +127,15 @@ PSReadLine 仅在交互式终端中配置，默认使用历史预测和列表视
 | `g sync` | 获取远端信息成功后执行 `git pull --ff-only` |
 | `g vv` | 查看本地分支及其上游 |
 | `g sw <分支>` | 使用 `git switch` 切换分支 |
+| `g swp <分支>` | 切换成功后使用 `git pull --ff-only` 同步分支 |
+| `g r <v\|a>` | 查看远端，或添加远端名称和 URL |
+| `g st <l\|a\|d\|p>` | 列出、应用、删除或创建 stash |
 
-`j`、`dev` 和 `run` 会根据本机配置动态提供 Tab 补全。所有入口在缺少参数时都会显示简短用法，不进入 PowerShell 的参数补问。
+`g r v` 对应 `git remote -v`，`g r a <名称> <URL>` 对应 `git remote add`，添加后不会自动获取远端内容。
+
+`g st l` 列出 stash；`g st a [序号]` 应用指定或最新 stash；`g st d <序号>` 删除指定 stash；`g st p <说明>` 使用 `git stash push -u -m` 保存包含未跟踪文件的修改。删除操作必须明确提供非负整数序号。
+
+`j`、`dev` 和 `run` 会根据本机配置动态提供 Tab 补全；`g` 会补全一级命令以及 `r`、`st` 的二级动作。所有入口在缺少参数时都会显示简短用法，不进入 PowerShell 的参数补问。
 
 ## 自检与修复
 
