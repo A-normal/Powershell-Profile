@@ -32,10 +32,9 @@ function global:pp {
                 Write-Host '  dev <项目> <动作>    执行预设开发任务'
             }
             if ($global:PSProfileConfig.Features.Git) {
-                Write-Host '  g f                 获取并清理远端分支信息'
-                Write-Host '  g sync              仅以 fast-forward 方式同步当前分支'
-                Write-Host '  g vv                查看本地分支及其上游'
-                Write-Host '  g sw <分支>         切换分支'
+                Write-Host '  g <f|sync|vv|sw|swp>  Git 获取、同步与分支操作'
+                Write-Host '  g r <v|a>              查看或添加远端'
+                Write-Host '  g st <l|a|d|p>         管理 stash'
             }
             if ($global:PSProfileConfig.Features.Run) {
                 Write-Host '  run <目标> [动作]    启动预设运行目标'
