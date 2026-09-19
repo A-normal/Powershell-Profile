@@ -10,13 +10,13 @@ function global:dev {
 
     if ($args.Count -gt 0) {
         Write-Warning 'dev 不接受额外参数。'
-        Write-Host '用法：dev <项目> <动作>' -ForegroundColor Yellow
+        Write-Host '用法：dev <项目> [动作]' -ForegroundColor Yellow
         return
     }
 
     $projects = $global:PSProfileConfig.Development
     if (-not $Project) {
-        Write-Host '用法：dev <项目> <动作>' -ForegroundColor Yellow
+        Write-Host '用法：dev <项目> [动作]' -ForegroundColor Yellow
         if ($projects.Count -gt 0) {
             Write-Host "可用项目：$($projects.Keys -join ', ')"
         }
@@ -40,8 +40,11 @@ function global:dev {
     }
 
     $actions = $projectConfig['Actions']
+    if (-not $Action -and $projectConfig.Contains('DefaultAction')) {
+        $Action = [string]$projectConfig['DefaultAction']
+    }
     if (-not $Action) {
-        Write-Host '用法：dev <项目> <动作>' -ForegroundColor Yellow
+        Write-Host '用法：dev <项目> [动作]' -ForegroundColor Yellow
         Write-Host "项目 $Project 的可用动作：$($actions.Keys -join ', ')"
         return
     }

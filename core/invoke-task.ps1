@@ -85,7 +85,8 @@ function global:Resolve-PSProfileTask {
         return [pscustomobject]$result
     }
 
-    $stepDefinitions = if ($hasMultipleSteps) { @($Task['Steps']) } else { @($Task) }
+    # 在条件表达式外收集数组，避免单步骤被展开为字典后按整数索引读取其值。
+    $stepDefinitions = @(if ($hasMultipleSteps) { $Task['Steps'] } else { $Task })
     if ($stepDefinitions.Count -eq 0) {
         $result.Message = '任务的 Steps 不能为空。'
         return [pscustomobject]$result
