@@ -29,7 +29,7 @@ function global:pp {
                 Write-Host '  j <名称>             进入本机配置的目录'
             }
             if ($global:PSProfileConfig.Features.Dev) {
-                Write-Host '  dev <项目> <动作>    执行预设开发任务'
+                Write-Host '  dev <项目> [动作]    执行预设开发任务'
             }
             if ($global:PSProfileConfig.Features.Git) {
                 Write-Host '  g <f|sync|vv|sw|swp>  Git 获取、同步与分支操作'
