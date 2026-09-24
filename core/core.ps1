@@ -21,7 +21,8 @@ function global:pp {
             if ($global:PSProfileConfig.Features.Jump -or
                 $global:PSProfileConfig.Features.Dev -or
                 $global:PSProfileConfig.Features.Git -or
-                $global:PSProfileConfig.Features.Run) {
+                $global:PSProfileConfig.Features.Run -or
+                $global:PSProfileConfig.Features.Linux) {
                 Write-Host ''
                 Write-Host '已启用的工作命令：' -ForegroundColor Cyan
             }
@@ -38,6 +39,11 @@ function global:pp {
             }
             if ($global:PSProfileConfig.Features.Run) {
                 Write-Host '  run <目标> [动作]    启动预设运行目标'
+            }
+            if ($global:PSProfileConfig.Features.Linux) {
+                Write-Host '  ll [-a|-h|-t|-r]     格式化列出目录或文件，默认易读大小'
+                Write-Host '  port [端口号]        查看占用端口的进程或列出所有监听端口'
+                Write-Host '  cp/mv/rm             Linux 习惯参数转义（支持 -rf/-f/-r 等）'
             }
             return
         }
@@ -171,9 +177,19 @@ function global:pp {
                             continue
                         }
 
-                        foreach ($actionName in $projectConfig['Actions'].Keys) {
+                        $actions = $projectConfig['Actions']
+                        if ($projectConfig.Contains('DefaultAction') -and
+                            -not $actions.Contains([string]$projectConfig['DefaultAction'])) {
+                            $checks.Add([pscustomobject]@{
+                                    Status  = 'FAIL'
+                                    Item    = "开发项目 $projectName"
+                                    Message = "默认动作不存在：$($projectConfig['DefaultAction'])"
+                                })
+                        }
+
+                        foreach ($actionName in $actions.Keys) {
                             $resolvedTask = Resolve-PSProfileTask `
-                                -Task $projectConfig['Actions'][$actionName] `
+                                -Task $actions[$actionName] `
                                 -DefaultPathKey ([string]$projectConfig['PathKey'])
                             $checks.Add([pscustomobject]@{
                                     Status  = if ($resolvedTask.IsValid) { 'OK' } else { 'FAIL' }
@@ -250,6 +266,22 @@ function global:pp {
                         Status  = if ($psReadLine) { 'OK' } else { 'FAIL' }
                         Item    = 'PSReadLine'
                         Message = if ($psReadLine) { "$($psReadLine.Version) - $($psReadLine.Path)" } else { '找不到 PSReadLine 模块' }
+                    })
+            }
+
+            if ($global:PSProfileConfig.Features.Linux) {
+                $netTcpCommand = Get-Command Get-NetTCPConnection -ErrorAction SilentlyContinue
+                $checks.Add([pscustomobject]@{
+                        Status  = if ($netTcpCommand) { 'OK' } else { 'WARN' }
+                        Item    = 'Linux 网络查询 (NetTCPIP)'
+                        Message = if ($netTcpCommand) { 'Get-NetTCPConnection 可用' } else { '缺少 Get-NetTCPConnection，port 命令受限' }
+                    })
+
+                $linuxFile = Join-Path $global:PSProfileRoot 'functions\linux.ps1'
+                $checks.Add([pscustomobject]@{
+                        Status  = if (Test-Path -LiteralPath $linuxFile -PathType Leaf) { 'OK' } else { 'FAIL' }
+                        Item    = 'Linux 命令脚本'
+                        Message = if (Test-Path -LiteralPath $linuxFile -PathType Leaf) { $linuxFile } else { '找不到 functions\linux.ps1' }
                     })
             }
 

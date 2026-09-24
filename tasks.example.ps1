@@ -4,8 +4,9 @@
 
 $global:PSProfileConfig.Development = [ordered]@{
     project = [ordered]@{
-        PathKey = 'project'
-        Actions = [ordered]@{
+        PathKey       = 'project'
+        DefaultAction = 'action'
+        Actions       = [ordered]@{
             action = [ordered]@{
                 Steps = @(
                     [ordered]@{

@@ -8,6 +8,7 @@ $global:PSProfileConfig = [ordered]@{
         Dev        = $true
         Git        = $true
         Run        = $true
+        Linux      = $true
         PSReadLine = $true
     }
     PSReadLine = [ordered]@{
