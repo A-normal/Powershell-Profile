@@ -14,9 +14,22 @@ else {
 }
 
 # 重载时先清理本 Profile 管理的可选命令，避免关闭功能后残留旧定义。
-$managedCommands = @('j', 'dev', 'g', 'run')
+$managedCommands = @('j', 'dev', 'g', 'run', 'll', 'port', 'cp', 'mv', 'rm', 'Format-PSProfileSize')
 foreach ($managedCommand in $managedCommands) {
     Remove-Item -LiteralPath "Function:\$managedCommand" -Force -ErrorAction SilentlyContinue
+}
+
+# 若 Linux 功能未启用，恢复 PowerShell 原生别名（若曾被接管）
+if (-not $global:PSProfileConfig.Features.Linux) {
+    if (-not (Get-Alias cp -ErrorAction SilentlyContinue)) {
+        Set-Alias -Name cp -Value Microsoft.PowerShell.Management\Copy-Item -Option AllScope -Force -ErrorAction SilentlyContinue
+    }
+    if (-not (Get-Alias mv -ErrorAction SilentlyContinue)) {
+        Set-Alias -Name mv -Value Microsoft.PowerShell.Management\Move-Item -Option AllScope -Force -ErrorAction SilentlyContinue
+    }
+    if (-not (Get-Alias rm -ErrorAction SilentlyContinue)) {
+        Set-Alias -Name rm -Value Microsoft.PowerShell.Management\Remove-Item -Option AllScope -Force -ErrorAction SilentlyContinue
+    }
 }
 
 # 仅在相关功能启用时读取本机路径和任务配置。
@@ -56,6 +69,7 @@ $featureFiles = [ordered]@{
     Dev        = 'dev.ps1'
     Git        = 'git.ps1'
     Run        = 'run.ps1'
+    Linux      = 'linux.ps1'
     PSReadLine = 'psreadline.ps1'
 }
 

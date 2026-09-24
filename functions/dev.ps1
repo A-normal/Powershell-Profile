@@ -43,6 +43,10 @@ function global:dev {
     if (-not $Action -and $projectConfig.Contains('DefaultAction')) {
         $Action = [string]$projectConfig['DefaultAction']
     }
+    if (-not $Action -and $projectConfig.Contains('DefaultAction')) {
+        $Action = [string]$projectConfig['DefaultAction']
+    }
+
     if (-not $Action) {
         Write-Host '用法：dev <项目> [动作]' -ForegroundColor Yellow
         Write-Host "项目 $Project 的可用动作：$($actions.Keys -join ', ')"
@@ -62,10 +66,10 @@ Register-ArgumentCompleter -CommandName dev -ParameterName Project -ScriptBlock 
     param($commandName, $parameterName, $wordToComplete)
 
     $global:PSProfileConfig.Development.Keys |
-        Where-Object { $_ -like "$wordToComplete*" } |
-        ForEach-Object {
-            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-        }
+    Where-Object { $_ -like "$wordToComplete*" } |
+    ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
 }
 
 Register-ArgumentCompleter -CommandName dev -ParameterName Action -ScriptBlock {
@@ -86,8 +90,8 @@ Register-ArgumentCompleter -CommandName dev -ParameterName Action -ScriptBlock {
     }
 
     $projectConfig['Actions'].Keys |
-        Where-Object { $_ -like "$wordToComplete*" } |
-        ForEach-Object {
-            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-        }
+    Where-Object { $_ -like "$wordToComplete*" } |
+    ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
 }

@@ -9,10 +9,10 @@ function global:Resolve-PSProfileTask {
     )
 
     $result = [ordered]@{
-        IsValid         = $false
-        Message         = $null
+        IsValid          = $false
+        Message          = $null
         WorkingDirectory = $null
-        Steps           = @()
+        Steps            = @()
     }
 
     if (-not $Task) {
@@ -85,8 +85,14 @@ function global:Resolve-PSProfileTask {
         return [pscustomobject]$result
     }
 
-    # 在条件表达式外收集数组，避免单步骤被展开为字典后按整数索引读取其值。
-    $stepDefinitions = @(if ($hasMultipleSteps) { $Task['Steps'] } else { $Task })
+    # 分支表达式会把只有一个元素的数组再次解包；单条 ordered 任务随后会按
+    # 数字索引取出字段值，而不是把任务本身当作一个步骤处理。
+    if ($hasMultipleSteps) {
+        $stepDefinitions = @($Task['Steps'])
+    }
+    else {
+        $stepDefinitions = @($Task)
+    }
     if ($stepDefinitions.Count -eq 0) {
         $result.Message = '任务的 Steps 不能为空。'
         return [pscustomobject]$result

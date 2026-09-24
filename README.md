@@ -15,6 +15,7 @@ functions/
   dev.ps1
   git.ps1
   jump.ps1
+  linux.ps1
   psreadline.ps1
   run.ps1
 install.ps1
@@ -66,8 +67,9 @@ $global:PSProfileConfig.Paths = [ordered]@{
 ```powershell
 $global:PSProfileConfig.Development = [ordered]@{
     project = [ordered]@{
-        PathKey = 'project'
-        Actions = [ordered]@{
+        PathKey       = 'project'
+        DefaultAction = 'action'
+        Actions       = [ordered]@{
             action = [ordered]@{
                 Steps = @(
                     [ordered]@{
@@ -85,7 +87,7 @@ $global:PSProfileConfig.Development = [ordered]@{
 }
 ```
 
-`dev` 和 `run` 只执行配置表中精确匹配的项目、目标和动作，不接受额外参数。任务执行器不使用 `Invoke-Expression`，不会解释或拼接命令字符串。多个步骤按照配置顺序执行，任一步骤失败都会停止后续步骤。配置了工作目录时，执行结束后会恢复原目录；子目录也不能越过对应的项目根目录。
+`dev` 和 `run` 只执行配置表中精确匹配的项目、目标和动作，不接受额外参数。项目或运行目标配置了 `DefaultAction` 时可以省略动作，例如 `dev project` 等同于 `dev project action`。任务执行器不使用 `Invoke-Expression`，不会解释或拼接命令字符串。多个步骤按照配置顺序执行，任一步骤失败都会停止后续步骤。配置了工作目录时，执行结束后会恢复原目录；子目录也不能越过对应的项目根目录。
 
 `dev` 项目可配置 `DefaultAction`，省略动作时执行该默认动作；未配置默认动作时显示可用动作。
 
@@ -100,6 +102,7 @@ $global:PSProfileConfig = [ordered]@{
         Dev        = $true
         Git        = $true
         Run        = $true
+        Linux      = $true
         PSReadLine = $true
     }
     Paths       = [ordered]@{}
@@ -110,7 +113,7 @@ $global:PSProfileConfig = [ordered]@{
 
 PSReadLine 仅在交互式终端中配置，默认使用历史预测和列表视图；上下方向键按照已输入的前缀搜索历史命令。
 
-关闭 `Jump`、`Dev`、`Git` 或 `Run` 后执行 `pp reload`，对应命令会从当前 Shell 中卸载。所有相关功能都关闭时，不会读取本机路径和任务配置；帮助和自检也会按功能开关过滤。
+关闭 `Jump`、`Dev`、`Git`、`Run` 或 `Linux` 后执行 `pp reload`，对应命令会从当前 Shell 中卸载。所有相关功能都关闭时，不会读取本机路径和任务配置；帮助和自检也会按功能开关过滤。
 
 ## 命令说明
 
@@ -123,7 +126,7 @@ PSReadLine 仅在交互式终端中配置，默认使用历史预测和列表视
 | `pp reload` | 在当前窗口重新加载配置与函数 |
 | `pp root` | 进入本仓库目录 |
 | `j <名称>` | 进入 `location.ps1` 中配置的目录 |
-| `dev <项目> [动作]` | 在项目目录中执行预设开发任务 |
+| `dev <项目> [动作]` | 在项目目录中执行预设开发任务；可使用默认动作 |
 | `run <目标> [动作]` | 启动预设应用或运行环境 |
 | `g f` | 执行 `git fetch --all --prune` |
 | `g sync` | 获取远端信息成功后执行 `git pull --ff-only` |
@@ -133,12 +136,19 @@ PSReadLine 仅在交互式终端中配置，默认使用历史预测和列表视
 | `g r <v\|a>` | 查看远端，或添加远端名称和 URL |
 | `g s` | 查看本地分支当前状态 |
 | `g st <l\|a\|d\|p>` | 列出、应用、删除或创建 stash |
+| `ll [-a\|-h\|-t\|-r] [路径]` | 格式化查看目录或文件，默认以易读单位显示大小，支持 `-la` 等组合参数 |
+| `port [端口号]` | 查看占用端口的连接与所属进程，无参时列出所有处于 Listen 状态的端口 |
+| `cp [-r\|-f\|-rf] <源...> <目标>` | 复制文件或目录，自动将 `-rf/-f/-r` 转义为 PowerShell 的 `-Recurse -Force` |
+| `mv [-f] <源...> <目标>` | 移动文件或目录，支持 `-f` 强制覆盖 |
+| `rm [-r\|-f\|-rf] <路径...>` | 删除文件或目录，自动将 `-rf/-f/-r` 转义为 PowerShell 的 `-Recurse -Force` |
 
 `g r v` 对应 `git remote -v`，`g r a <名称> <URL>` 对应 `git remote add`，添加后不会自动获取远端内容。
 
 `g st l` 列出 stash；`g st a [序号]` 应用指定或最新 stash；`g st d <序号>` 删除指定 stash；`g st p <说明>` 使用 `git stash push -u -m` 保存包含未跟踪文件的修改。删除操作必须明确提供非负整数序号。
 
-`j`、`dev` 和 `run` 会根据本机配置动态提供 Tab 补全；`g` 会补全一级命令以及 `r`、`st` 的二级动作。所有入口在缺少参数时都会显示简短用法，不进入 PowerShell 的参数补问。
+`ll` 支持组合参数（如 `ll -la`、`ll -lh`、`ll -lt`）和路径参数；`port` 支持单端口精确定位（如 `port 8080`、`port :8080`）或无参数列出所有监听端口；`cp`、`mv`、`rm` 覆盖了原生别名，支持常见的 Linux 参数习惯，避免原生命令因 `-rf` 参数报错。
+
+`j`、`dev` 和 `run` 会根据本机配置动态提供 Tab 补全；`port` 支持补全当前监听端口；`g` 会补全一级命令以及 `r`、`st` 的二级动作。所有入口在缺少参数时都会显示简短用法，不进入 PowerShell 的参数补问。
 
 ## 自检与修复
 
