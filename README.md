@@ -131,6 +131,7 @@ PSReadLine 仅在交互式终端中配置，默认使用历史预测和列表视
 | `g sw <分支>` | 使用 `git switch` 切换分支 |
 | `g swp <分支>` | 切换成功后使用 `git pull --ff-only` 同步分支 |
 | `g r <v\|a>` | 查看远端，或添加远端名称和 URL |
+| `g s` | 查看本地分支当前状态 |
 | `g st <l\|a\|d\|p>` | 列出、应用、删除或创建 stash |
 
 `g r v` 对应 `git remote -v`，`g r a <名称> <URL>` 对应 `git remote add`，添加后不会自动获取远端内容。
