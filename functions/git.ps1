@@ -10,7 +10,7 @@ function global:g {
     )
 
     if (-not $Command) {
-        Write-Host '用法：g <f|sync|vv|sw|swp>' -ForegroundColor Yellow
+        Write-Host '用法：g <f|sync|vv|sw|swp|s>' -ForegroundColor Yellow
         Write-Host '      g r <v|a>'
         Write-Host '      g st <l|a|d|p>'
         return
@@ -28,6 +28,13 @@ function global:g {
                 return
             }
             & git fetch --all --prune
+        }
+        's' {
+            if ($Arguments.Count -ne 0) {
+                Write-Host '用法：g s' -ForegroundColor Yellow
+                return
+            }
+            & git status
         }
         'sync' {
             if ($Arguments.Count -ne 0) {
@@ -168,10 +175,10 @@ Register-ArgumentCompleter -CommandName g -ParameterName Command -ScriptBlock {
     param($commandName, $parameterName, $wordToComplete)
 
     'f', 'sync', 'vv', 'sw', 'swp', 'r', 'st' |
-        Where-Object { $_ -like "$wordToComplete*" } |
-        ForEach-Object {
-            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-        }
+    Where-Object { $_ -like "$wordToComplete*" } |
+    ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
 }
 
 Register-ArgumentCompleter -CommandName g -ParameterName Arguments -ScriptBlock {
@@ -189,8 +196,8 @@ Register-ArgumentCompleter -CommandName g -ParameterName Arguments -ScriptBlock 
     }
 
     $actions |
-        Where-Object { $_ -like "$wordToComplete*" } |
-        ForEach-Object {
-            [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-        }
+    Where-Object { $_ -like "$wordToComplete*" } |
+    ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
 }
