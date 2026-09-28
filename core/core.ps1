@@ -33,7 +33,7 @@ function global:pp {
                 Write-Host '  dev <项目> [动作]    执行预设开发任务'
             }
             if ($global:PSProfileConfig.Features.Git) {
-                Write-Host '  g <f|sync|vv|sw|swp>  Git 获取、同步与分支操作'
+                Write-Host '  g <f|sync|vv|sw|swp|s> Git 获取、同步与分支操作'
                 Write-Host '  g r <v|a>              查看或添加远端'
                 Write-Host '  g st <l|a|d|p>         管理 stash'
             }

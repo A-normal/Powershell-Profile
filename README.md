@@ -129,7 +129,7 @@ PSReadLine 仅在交互式终端中配置，默认使用历史预测和列表视
 | `dev <项目> [动作]` | 在项目目录中执行预设开发任务；可使用默认动作 |
 | `run <目标> [动作]` | 启动预设应用或运行环境 |
 | `g f` | 执行 `git fetch --all --prune` |
-| `g sync` | 获取远端信息成功后执行 `git pull --ff-only` |
+| `g sync` | 全量获取远端并安全快进同步所有本地跟踪分支（Plumbing 毫秒级更新） |
 | `g vv` | 查看本地分支及其上游 |
 | `g sw <分支>` | 使用 `git switch` 切换分支 |
 | `g swp <分支>` | 切换成功后使用 `git pull --ff-only` 同步分支 |
@@ -145,6 +145,8 @@ PSReadLine 仅在交互式终端中配置，默认使用历史预测和列表视
 `g r v` 对应 `git remote -v`，`g r a <名称> <URL>` 对应 `git remote add`，添加后不会自动获取远端内容。
 
 `g st l` 列出 stash；`g st a [序号]` 应用指定或最新 stash；`g st d <序号>` 删除指定 stash；`g st p <说明>` 使用 `git stash push -u -m` 保存包含未跟踪文件的修改。删除操作必须明确提供非负整数序号。
+
+`g sync` 采用 Git Plumbing 底层命令机制：首先执行 `git fetch --all --prune`；对当前分支使用 `git merge --ff-only` 更新工作区与索引，对非当前分支使用 `git update-ref` 毫秒级原子更新引用指针，无需切换分支且不触碰工作区；若检测到分支分叉、包含未推送提交（Ahead）或上游已删除（Gone），将自动跳过并输出清晰的状态汇总表。
 
 `ll` 支持组合参数（如 `ll -la`、`ll -lh`、`ll -lt`）和路径参数；`port` 支持单端口精确定位（如 `port 8080`、`port :8080`）或无参数列出所有监听端口；`cp`、`mv`、`rm` 覆盖了原生别名，支持常见的 Linux 参数习惯，避免原生命令因 `-rf` 参数报错。
 
